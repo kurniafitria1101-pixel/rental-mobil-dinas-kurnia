@@ -1,0 +1,15 @@
+# Dependencies
+backend/node_modules/
+
+# Environment
+backend/.env
+
+# IDE
+.idea/
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
