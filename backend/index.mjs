@@ -1,5 +1,10 @@
 import express from 'express';
+
+
 import userRoutes from './routes/userRoutes.mjs';
+import mobilRoutes from './routes/mobilRoutes.mjs';
+import sopirRoutes from './routes/sopirRoutes.mjs';
+import pengajuanRoutes from './routes/pengajuanRoutes.mjs';
 
 const app = express();
 const port = 3000;
@@ -13,6 +18,12 @@ app.get('/', (req, res) => {
 
 // Route users
 app.use('/api/users', userRoutes);
+// Route mobil
+app.use('/api/mobil', mobilRoutes);
+// Route sopir
+app.use('/api/sopir', sopirRoutes);
+// Route pengajuan
+app.use('/api/pengajuan', pengajuanRoutes);
 
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);

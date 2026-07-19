@@ -188,6 +188,7 @@ export const deleteUser = async (req, res) => {
             [id]
         );
 
+
         if (result.affectedRows === 0) {
             return res.status(404).json({
                 message: "User tidak ditemukan"

@@ -1,14 +1,14 @@
 import db from '../config/db.mjs';
 
 // ==============================
-// Menampilkan semua mobil
+// Menampilkan semua sopir
 // ==============================
-export const getMobils = async (req, res) => {
+export const getSopirs = async (req, res) => {
 
     try {
 
         const [rows] = await db.query(
-            "SELECT * FROM mobil"
+            "SELECT * FROM sopir"
         );
 
         res.json(rows);
@@ -26,24 +26,23 @@ export const getMobils = async (req, res) => {
 };
 
 
-
 // ==============================
-// Menampilkan mobil berdasarkan ID
+// Menampilkan sopir berdasarkan ID
 // ==============================
-export const getMobilById = async (req, res) => {
+export const getSopirById = async (req, res) => {
 
     try {
 
         const { id } = req.params;
 
         const [rows] = await db.query(
-            "SELECT * FROM mobil WHERE id_mobil = ?",
+            "SELECT * FROM sopir WHERE id_sopir = ?",
             [id]
         );
 
         if (rows.length === 0) {
             return res.status(404).json({
-                message: "Mobil tidak ditemukan"
+                message: "Sopir tidak ditemukan"
             });
         }
 
@@ -62,45 +61,38 @@ export const getMobilById = async (req, res) => {
 };
 
 
-
 // ==============================
-// Menambahkan mobil
+// Menambahkan sopir
 // ==============================
-export const createMobil = async (req, res) => {
+export const createSopir = async (req, res) => {
 
     try {
         console.log(req.body);
 
         const {
-            plat_nomor,
-            merk,
-            tipe,
-            tahun,
-            warna,
-            kapasitas,
-            status,
-            foto
+            nama_sopir,
+            no_hp,
+            alamat,
+            no_sim,
+            status
         } = req.body;
 
         const sql = `
-            INSERT INTO mobil
-            (plat_nomor, merk, tipe, tahun, warna, kapasitas, status, foto)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO sopir
+            (nama_sopir, no_hp, alamat, no_sim, status)
+            VALUES (?, ?, ?, ?, ?)
         `;
 
         await db.query(sql, [
-            plat_nomor,
-            merk,
-            tipe,
-            tahun,
-            warna,
-            kapasitas,
-            status,
-            foto
+            nama_sopir,
+            no_hp,
+            alamat,
+            no_sim,
+            status
         ]);
 
         res.status(201).json({
-            message: "Mobil berhasil ditambahkan"
+            message: "Sopir berhasil ditambahkan"
         });
 
     } catch (error) {
@@ -117,58 +109,49 @@ export const createMobil = async (req, res) => {
 
 
 // ==============================
-// Update mobil
+// Update sopir
 // ==============================
-export const updateMobil = async (req, res) => {
+export const updateSopir = async (req, res) => {
 
     try {
 
         const { id } = req.params;
 
         const {
-            plat_nomor,
-            merk,
-            tipe,
-            tahun,
-            warna,
-            kapasitas,
-            status,
-            foto
+            nama_sopir,
+            no_hp,
+            alamat,
+            no_sim,
+            status
         } = req.body;
 
         const [result] = await db.query(
-            `UPDATE mobil
+            `UPDATE sopir
              SET
-                plat_nomor=?,
-                merk=?,
-                tipe=?,
-                tahun=?,
-                warna=?,
-                kapasitas=?,
-                status=?,
-                foto=?
-             WHERE id_mobil=?`,
+                nama_sopir=?,
+                no_hp=?,
+                alamat=?,
+                no_sim=?,
+                status=?
+             WHERE id_sopir=?`,
             [
-                plat_nomor,
-                merk,
-                tipe,
-                tahun,
-                warna,
-                kapasitas,
+                nama_sopir,
+                no_hp,
+                alamat,
+                no_sim,
                 status,
-                foto,
                 id
             ]
         );
 
         if (result.affectedRows === 0) {
             return res.status(404).json({
-                message: "Mobil tidak ditemukan"
+                message: "Sopir tidak ditemukan"
             });
         }
 
         res.json({
-            message: "Mobil berhasil diupdate"
+            message: "Sopir berhasil diupdate"
         });
 
     } catch (error) {
@@ -184,29 +167,28 @@ export const updateMobil = async (req, res) => {
 };
 
 
-
 // ==============================
-// Hapus mobil
+// Hapus sopir
 // ==============================
-export const deleteMobil = async (req, res) => {
+export const deleteSopir = async (req, res) => {
 
     try {
 
         const { id } = req.params;
 
         const [result] = await db.query(
-            "DELETE FROM mobil WHERE id_mobil = ?",
+            "DELETE FROM sopir WHERE id_sopir = ?",
             [id]
         );
 
         if (result.affectedRows === 0) {
             return res.status(404).json({
-                message: "Mobil tidak ditemukan"
+                message: "Sopir tidak ditemukan"
             });
         }
 
         res.json({
-            message: "Mobil berhasil dihapus"
+            message: "Sopir berhasil dihapus"
         });
 
     } catch (error) {

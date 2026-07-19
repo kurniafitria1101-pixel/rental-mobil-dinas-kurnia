@@ -84,7 +84,7 @@ values
     ('AA 5436 BB', 'Toyota', 'Avanza', 2022, 'Putih', 7, 'Tersedia'),
     ('AA 1231 AA', 'Mitsubishi', 'Pajero Sport', 2024, 'Hitam', 7, 'Dipakai');
 select * from mobil;
-
+DESCRIBE mobil;
 
 -- =============================================
 -- MEMBUAT TABLE SOPIR
@@ -124,6 +124,7 @@ VALUES
         'Cuti'
     );
 SELECT * FROM sopir;
+DESCRIBE sopir;
 
 
 -- ==================================
@@ -177,6 +178,7 @@ select * from pengajuan_rental;
 SHOW COLUMNS FROM pengajuan_rental;
 delete from pengajuan_rental;
 alter table pengajuan_rental AUTO_INCREMENT = 1;
+DESCRIBE pengajuan_rental;
 
 
 -- ==============================================
@@ -211,7 +213,7 @@ insert into approval(
 select * from approval;
 delete from approval;
 alter table approval AUTO_INCREMENT = 1;
-
+DESCRIBE approval;
 
 -- =========================================================
 -- TABEL PENGEMBALIAN
