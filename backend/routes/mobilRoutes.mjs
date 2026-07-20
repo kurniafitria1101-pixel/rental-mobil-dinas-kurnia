@@ -8,21 +8,40 @@ import {
     deleteMobil
 } from '../controllers/mobilController.mjs';
 
+import { verifyToken } from '../middlewares/authMiddleware.mjs';
+import { authorizeRole } from '../middlewares/roleMiddleware.mjs';
+
 const router = express.Router();
 
+
 // Menampilkan semua mobil
-router.get('/', getMobils);
+router.get('/', verifyToken, getMobils);
 
 // Menampilkan mobil berdasarkan ID
-router.get('/:id', getMobilById);
+router.get('/:id', verifyToken, getMobilById);
 
 // Menambahkan mobil
-router.post('/', createMobil);
+router.post(
+    '/',
+    verifyToken,
+    authorizeRole(1),
+    createMobil
+);
 
 // Update mobil
-router.put('/:id', updateMobil);
+router.put(
+    '/:id',
+    verifyToken,
+    authorizeRole(1),
+    updateMobil
+);
 
 // Hapus mobil
-router.delete('/:id', deleteMobil);
+router.delete(
+    '/:id',
+    verifyToken,
+    authorizeRole(1),
+    deleteMobil
+);
 
 export default router;

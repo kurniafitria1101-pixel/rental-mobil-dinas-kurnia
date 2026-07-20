@@ -8,21 +8,48 @@ import {
     deleteApproval
 } from '../controllers/approvalController.mjs';
 
+import { verifyToken } from '../middlewares/authMiddleware.mjs';
+import { authorizeRole } from '../middlewares/roleMiddleware.mjs';
+
 const router = express.Router();
 
-// GET semua approval
-router.get('/', getApprovals);
+// Hanya Pimpinan yang boleh melihat approval
+router.get(
+    '/',
+    verifyToken,
+    authorizeRole(3),
+    getApprovals
+);
 
-// GET approval berdasarkan ID
-router.get('/:id', getApprovalById);
+router.get(
+    '/:id',
+    verifyToken,
+    authorizeRole(3),
+    getApprovalById
+);
 
-// POST approval
-router.post('/', createApproval);
+// Hanya Pimpinan yang boleh membuat approval
+router.post(
+    '/',
+    verifyToken,
+    authorizeRole(3),
+    createApproval
+);
 
-// PUT approval
-router.put('/:id', updateApproval);
+// Hanya Pimpinan yang boleh mengubah approval
+router.put(
+    '/:id',
+    verifyToken,
+    authorizeRole(3),
+    updateApproval
+);
 
-// DELETE approval
-router.delete('/:id', deleteApproval);
+// Hanya Pimpinan yang boleh menghapus approval
+router.delete(
+    '/:id',
+    verifyToken,
+    authorizeRole(3),
+    deleteApproval
+);
 
 export default router;

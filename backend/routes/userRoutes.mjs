@@ -8,21 +8,24 @@ import {
     deleteUser
 } from '../controllers/userController.mjs';
 
+import { verifyToken } from '../middlewares/authMiddleware.mjs';
+import { authorizeRole } from '../middlewares/roleMiddleware.mjs';
+
 const router = express.Router();
 
 // Menampilkan semua user
-router.get('/', getUsers);
+router.get('/', verifyToken, authorizeRole(1), getUsers);
 
 // Menampilkan user berdasarkan ID
-router.get('/:id', getUserById);
+router.get('/:id', verifyToken, authorizeRole(1), getUserById);
 
 // Menambahkan user
-router.post('/', createUser);
+router.post('/', verifyToken, authorizeRole(1), createUser);
 
 // Update user
-router.put('/:id', updateUser);
+router.put('/:id', verifyToken, authorizeRole(1), updateUser);
 
 // Hapus user
-router.delete('/:id', deleteUser);
+router.delete('/:id', verifyToken, authorizeRole(1), deleteUser);
 
 export default router;

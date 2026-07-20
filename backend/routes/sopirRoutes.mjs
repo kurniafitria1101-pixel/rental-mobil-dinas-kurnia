@@ -8,21 +8,21 @@ import {
     deleteSopir
 } from '../controllers/sopirController.mjs';
 
+import { verifyToken } from '../middlewares/authMiddleware.mjs';
+import { authorizeRole } from '../middlewares/roleMiddleware.mjs';
+
 const router = express.Router();
 
-// Menampilkan semua sopir
-router.get('/', getSopirs);
+// Semua yang login boleh melihat data sopir
+router.get('/', verifyToken, getSopirs);
 
-// Menampilkan sopir berdasarkan ID
-router.get('/:id', getSopirById);
+router.get('/:id', verifyToken, getSopirById);
 
-// Menambahkan sopir
-router.post('/', createSopir);
+// Hanya Admin yang boleh mengelola sopir
+router.post('/', verifyToken, authorizeRole(1), createSopir);
 
-// Update sopir
-router.put('/:id', updateSopir);
+router.put('/:id', verifyToken, authorizeRole(1), updateSopir);
 
-// Hapus sopir
-router.delete('/:id', deleteSopir);
+router.delete('/:id', verifyToken, authorizeRole(1), deleteSopir);
 
 export default router;

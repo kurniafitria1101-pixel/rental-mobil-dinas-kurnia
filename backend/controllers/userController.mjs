@@ -1,4 +1,5 @@
-import db from '../config/db.mjs';                                         //controller ini menggunakan koneksi MySQL
+import db from '../config/db.mjs';
+import bcrypt from 'bcryptjs';//controller ini menggunakan koneksi MySQL
 
 // Menampilkan semua user
 export const getUsers = async (req, res) => {
@@ -76,6 +77,9 @@ export const createUser = async (req, res) => {
             no_hp
         } = req.body;
 
+        // Enkripsi password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const sql = `
             INSERT INTO users
             (id_role, nama_lengkap, nip, username, password, email, no_hp)
@@ -87,7 +91,7 @@ export const createUser = async (req, res) => {
             nama_lengkap,
             nip,
             username,
-            password,
+            hashedPassword,
             email,
             no_hp
         ]);
@@ -110,7 +114,9 @@ export const createUser = async (req, res) => {
 
 
 
+// ====================================
 // Update user
+// ====================================
 export const updateUser = async (req, res) => {
 
     try {
@@ -127,6 +133,9 @@ export const updateUser = async (req, res) => {
             no_hp,
             status
         } = req.body;
+
+        // Enkripsi password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const [result] = await db.query(
             `UPDATE users
@@ -145,7 +154,7 @@ export const updateUser = async (req, res) => {
                 nama_lengkap,
                 nip,
                 username,
-                password,
+                hashedPassword,
                 email,
                 no_hp,
                 status,

@@ -8,21 +8,38 @@ import {
     deletePengajuan
 } from '../controllers/pengajuanController.mjs';
 
+import { verifyToken } from '../middlewares/authMiddleware.mjs';
+import { authorizeRole } from '../middlewares/roleMiddleware.mjs';
+
 const router = express.Router();
 
-// Menampilkan semua pengajuan
-router.get('/', getPengajuans);
+// Semua user yang login boleh melihat pengajuan
+router.get('/', verifyToken, getPengajuans);
 
-// Menampilkan pengajuan berdasarkan ID
-router.get('/:id', getPengajuanById);
+router.get('/:id', verifyToken, getPengajuanById);
 
-// Menambahkan pengajuan
-router.post('/', createPengajuan);
+// Pegawai membuat pengajuan
+router.post(
+    '/',
+    verifyToken,
+    authorizeRole(2),
+    createPengajuan
+);
 
-// Update pengajuan
-router.put('/:id', updatePengajuan);
+// Pegawai mengubah pengajuan
+router.put(
+    '/:id',
+    verifyToken,
+    authorizeRole(2),
+    updatePengajuan
+);
 
-// Hapus pengajuan
-router.delete('/:id', deletePengajuan);
+// Pegawai menghapus pengajuan
+router.delete(
+    '/:id',
+    verifyToken,
+    authorizeRole(2),
+    deletePengajuan
+);
 
 export default router;
