@@ -5,7 +5,8 @@ import {
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    updateStatusUser
 } from '../controllers/userController.mjs';
 
 import { verifyToken } from '../middlewares/authMiddleware.mjs';
@@ -24,6 +25,9 @@ router.post('/', verifyToken, authorizeRole(1), createUser);
 
 // Update user
 router.put('/:id', verifyToken, authorizeRole(1), updateUser);
+
+// Update status user
+router.put('/:id/status', verifyToken, authorizeRole(1), updateStatusUser);
 
 // Hapus user
 router.delete('/:id', verifyToken, authorizeRole(1), deleteUser);

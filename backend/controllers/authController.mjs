@@ -27,6 +27,12 @@ export const login = async (req, res) => {
 
         const user = rows[0];
 
+        if (user.status !== "Aktif") {
+            return res.status(403).json({
+                message: "Akun Anda belum diaktifkan oleh Admin."
+            });
+        }
+
         const match = await bcrypt.compare(password, user.password);
 
         if (!match) {
@@ -55,6 +61,79 @@ export const login = async (req, res) => {
                 username: user.username,
                 role: user.id_role
             }
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+
+};
+
+/* ================= REGISTER PEGAWAI ================= */
+
+export const register = async (req, res) => {
+
+    try {
+
+        const {
+            nama_lengkap,
+            nip,
+            username,
+            password,
+            email,
+            no_hp
+        } = req.body;
+
+        // cek username
+        const [cekUsername] = await db.query(
+            "SELECT * FROM users WHERE username = ?",
+            [username]
+        );
+
+        if (cekUsername.length > 0) {
+            return res.status(400).json({
+                message: "Username sudah digunakan"
+            });
+        }
+
+        // cek NIP
+        const [cekNip] = await db.query(
+            "SELECT * FROM users WHERE nip = ?",
+            [nip]
+        );
+
+        if (cekNip.length > 0) {
+            return res.status(400).json({
+                message: "NIP sudah terdaftar"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await db.query(
+            `INSERT INTO users
+            (id_role, nama_lengkap, nip, username, password, email, no_hp, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                2,
+                nama_lengkap,
+                nip,
+                username,
+                hashedPassword,
+                email,
+                no_hp,
+                "Nonaktif"
+            ]
+        );
+
+        res.status(201).json({
+            message: "Registrasi berhasil. Menunggu persetujuan Admin."
         });
 
     } catch (error) {
