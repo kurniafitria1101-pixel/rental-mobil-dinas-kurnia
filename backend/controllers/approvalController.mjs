@@ -1,91 +1,3 @@
-import db from '../config/db.mjs';
-
-// ==============================
-// Menampilkan semua approval
-// ==============================
-export const getApprovals = async (req, res) => {
-
-    try {
-
-        const [rows] = await db.query(`
-            SELECT
-                a.*,
-                p.tujuan,
-                p.keperluan,
-                u.nama_lengkap,
-                m.plat_nomor
-            FROM approval a
-            JOIN pengajuan_rental p
-                ON a.id_pengajuan = p.id_pengajuan
-            JOIN users u
-                ON p.id_user = u.id_user
-            JOIN mobil m
-                ON p.id_mobil = m.id_mobil
-            ORDER BY a.id_approval DESC
-        `);
-
-        res.json(rows);
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            message: error.message
-        });
-
-    }
-
-};
-
-
-// ==============================
-// Menampilkan approval berdasarkan ID
-// ==============================
-export const getApprovalById = async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-        const [rows] = await db.query(`
-            SELECT
-                a.*,
-                p.tujuan,
-                p.keperluan,
-                u.nama_lengkap,
-                m.plat_nomor
-            FROM approval a
-            JOIN pengajuan_rental p
-                ON a.id_pengajuan = p.id_pengajuan
-            JOIN users u
-                ON p.id_user = u.id_user
-            JOIN mobil m
-                ON p.id_mobil = m.id_mobil
-            WHERE a.id_approval = ?
-        `, [id]);
-
-        if (rows.length === 0) {
-            return res.status(404).json({
-                message: "Approval tidak ditemukan"
-            });
-        }
-
-        res.json(rows[0]);
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            message: error.message
-        });
-
-    }
-
-};
-
-
 export const createApproval = async (req, res) => {
 
     try {
@@ -154,7 +66,6 @@ export const createApproval = async (req, res) => {
     }
 
 };
-
 
 // ==============================
 // Update approval
@@ -227,60 +138,6 @@ export const updateApproval = async (req, res) => {
 
         res.json({
             message: "Approval berhasil diupdate"
-        });
-
-    } catch (error) {
-
-        console.log(error);
-
-        res.status(500).json({
-            message: error.message
-        });
-
-    }
-
-};
-
-
-// ==============================
-// Hapus approval
-// ==============================
-export const deleteApproval = async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-        // Cari data approval terlebih dahulu
-        const [rows] = await db.query(
-            "SELECT * FROM approval WHERE id_approval = ?",
-            [id]
-        );
-
-        if (rows.length === 0) {
-            return res.status(404).json({
-                message: "Approval tidak ditemukan"
-            });
-        }
-
-        const approval = rows[0];
-
-        // Hapus approval
-        await db.query(
-            "DELETE FROM approval WHERE id_approval = ?",
-            [id]
-        );
-
-        // Kembalikan status pengajuan menjadi Menunggu
-        await db.query(
-            `UPDATE pengajuan_rental
-             SET status='Menunggu'
-             WHERE id_pengajuan=?`,
-            [approval.id_pengajuan]
-        );
-
-        res.json({
-            message: "Approval berhasil dihapus"
         });
 
     } catch (error) {
