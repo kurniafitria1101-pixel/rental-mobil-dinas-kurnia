@@ -79,13 +79,24 @@ export const createMobil = async (req, res) => {
             warna,
             kapasitas,
             status,
-            foto
+            foto,
+            estimasi_biaya_harian
         } = req.body;
 
         const sql = `
             INSERT INTO mobil
-            (plat_nomor, merk, tipe, tahun, warna, kapasitas, status, foto)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (
+                plat_nomor,
+                merk,
+                tipe,
+                tahun,
+                warna,
+                kapasitas,
+                status,
+                foto,
+                estimasi_biaya_harian
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         await db.query(sql, [
@@ -96,7 +107,8 @@ export const createMobil = async (req, res) => {
             warna,
             kapasitas,
             status,
-            foto
+            foto,
+            estimasi_biaya_harian
         ]);
 
         res.status(201).json({
@@ -133,7 +145,8 @@ export const updateMobil = async (req, res) => {
             warna,
             kapasitas,
             status,
-            foto
+            foto,
+            estimasi_biaya_harian
         } = req.body;
 
         const [result] = await db.query(
@@ -146,7 +159,8 @@ export const updateMobil = async (req, res) => {
                 warna=?,
                 kapasitas=?,
                 status=?,
-                foto=?
+                foto=?,
+                estimasi_biaya_harian=?
              WHERE id_mobil=?`,
             [
                 plat_nomor,
@@ -157,6 +171,7 @@ export const updateMobil = async (req, res) => {
                 kapasitas,
                 status,
                 foto,
+                estimasi_biaya_harian,
                 id
             ]
         );

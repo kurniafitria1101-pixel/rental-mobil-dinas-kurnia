@@ -105,11 +105,125 @@ export const createPengajuan = async (req, res) => {
             tanggal_kembali,
             jumlah_penumpang
         } = req.body;
-        if (!id_user || !id_mobil || !tujuan || !keperluan) {
+        if (
+            !id_user ||
+            !id_mobil ||
+            !unit_kerja ||
+            !tujuan ||
+            !keperluan ||
+            !tanggal_berangkat ||
+            !tanggal_kembali ||
+            !jumlah_penumpang
+        ) {
             return res.status(400).json({
-                message: "Data belum lengkap"
+                message: "Semua data wajib harus diisi"
             });
         }
+
+        if (jumlah_penumpang < 1) {
+            return res.status(400).json({
+                message: "Jumlah penumpang minimal 1 orang"
+            });
+        }
+
+
+        const tglBerangkat = new Date(tanggal_berangkat);
+        const tglKembali = new Date(tanggal_kembali);
+
+        if (tglKembali < tglBerangkat) {
+            return res.status(400).json({
+                message: "Tanggal kembali tidak boleh sebelum tanggal berangkat"
+            });
+        }
+
+        // Ambil estimasi biaya harian dari tabel mobil
+        const [mobil] = await db.query(
+            `
+    SELECT kapasitas, estimasi_biaya_harian
+    FROM mobil
+    WHERE id_mobil = ?
+    `,
+            [id_mobil]
+        );
+
+        if (mobil.length === 0) {
+            return res.status(404).json({
+                message: "Mobil tidak ditemukan"
+            });
+        }
+
+        // Cek apakah mobil sudah dipakai pada rentang tanggal yang sama
+        const [jadwalMobil] = await db.query(
+            `
+    SELECT id_pengajuan
+    FROM pengajuan_rental
+    WHERE id_mobil = ?
+      AND status IN ('Menunggu', 'Disetujui')
+      AND (
+            tanggal_berangkat <= ?
+        AND tanggal_kembali >= ?
+      )
+    `,
+            [
+                id_mobil,
+                tanggal_kembali,
+                tanggal_berangkat
+            ]
+        );
+
+        if (jadwalMobil.length > 0) {
+            return res.status(400).json({
+                message: "Mobil sudah digunakan pada rentang tanggal tersebut"
+            });
+        }
+
+        // Cek bentrok jadwal sopir
+        if (butuh_sopir === "Ya" && id_sopir) {
+
+            const [jadwalSopir] = await db.query(
+                `
+                    SELECT id_pengajuan
+                    FROM pengajuan_rental
+                    WHERE id_sopir = ?
+                      AND status IN ('Menunggu', 'Disetujui')
+                      AND (
+                        tanggal_berangkat <= ?
+                            AND tanggal_kembali >= ?
+                        )
+                `,
+                [
+                    id_sopir,
+                    tanggal_kembali,
+                    tanggal_berangkat
+                ]
+            );
+
+            if (jadwalSopir.length > 0) {
+                return res.status(400).json({
+                    message: "Sopir sudah memiliki jadwal pada rentang tanggal tersebut"
+                });
+            }
+        }
+
+            // Validasi kapasitas mobil
+            const kapasitasMobil = mobil[0].kapasitas;
+
+            if (jumlah_penumpang > kapasitasMobil) {
+                return res.status(400).json({
+                    message: `Jumlah penumpang melebihi kapasitas mobil (${kapasitasMobil} orang)`
+                });
+            }
+
+        const estimasiBiayaHarian = mobil[0].estimasi_biaya_harian;
+
+
+        const selisihHari =
+            Math.ceil((tglKembali - tglBerangkat) / (1000 * 60 * 60 * 24)) + 1;
+
+        const lama_penggunaan = selisihHari;
+
+// Hitung estimasi biaya
+        const estimasi_biaya = lama_penggunaan * estimasiBiayaHarian;
 
         const sql = `
             INSERT INTO pengajuan_rental
@@ -123,9 +237,11 @@ export const createPengajuan = async (req, res) => {
                 keperluan,
                 tanggal_berangkat,
                 tanggal_kembali,
-                jumlah_penumpang
+                jumlah_penumpang,
+                lama_penggunaan,
+                estimasi_biaya
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         await db.query(sql, [
@@ -138,7 +254,9 @@ export const createPengajuan = async (req, res) => {
             keperluan,
             tanggal_berangkat,
             tanggal_kembali,
-            jumlah_penumpang
+            jumlah_penumpang,
+            lama_penggunaan,
+            estimasi_biaya
         ]);
 
         res.status(201).json({
@@ -179,7 +297,134 @@ export const updatePengajuan = async (req, res) => {
             tanggal_kembali,
             jumlah_penumpang,
             status
-        } = req.body;
+        } = req.body
+
+        if (!id_user || !id_mobil || !tujuan || !keperluan) {
+            return res.status(400).json({
+                message: "Data belum lengkap"
+            });
+        }
+
+        // Ambil estimasi biaya harian mobil
+        const [mobil] = await db.query(
+            `
+            SELECT kapasitas, estimasi_biaya_harian
+            FROM mobil
+            WHERE id_mobil = ?
+            `,
+            [id_mobil]
+        );
+
+        if (mobil.length === 0) {
+            return res.status(404).json({
+                message: "Mobil tidak ditemukan"
+            });
+        }
+
+        if (
+            !unit_kerja ||
+            !tanggal_berangkat ||
+            !tanggal_kembali ||
+            !jumlah_penumpang
+        ) {
+            return res.status(400).json({
+                message: "Semua data wajib harus diisi"
+            });
+        }
+
+        if (jumlah_penumpang < 1) {
+            return res.status(400).json({
+                message: "Jumlah penumpang minimal 1 orang"
+            });
+        }
+
+        const tglBerangkat = new Date(tanggal_berangkat);
+        const tglKembali = new Date(tanggal_kembali);
+
+        if (tglKembali < tglBerangkat) {
+            return res.status(400).json({
+                message: "Tanggal kembali tidak boleh sebelum tanggal berangkat"
+            });
+        }
+
+        // Cek bentrok jadwal mobil
+        const [jadwalMobil] = await db.query(
+            `
+    SELECT id_pengajuan
+    FROM pengajuan_rental
+    WHERE id_mobil = ?
+      AND id_pengajuan <> ?
+      AND status IN ('Menunggu','Disetujui')
+      AND (
+            tanggal_berangkat <= ?
+        AND tanggal_kembali >= ?
+      )
+    `,
+            [
+                id_mobil,
+                id,
+                tanggal_kembali,
+                tanggal_berangkat
+            ]
+        );
+
+        if (jadwalMobil.length > 0) {
+            return res.status(400).json({
+                message: "Mobil sudah digunakan pada rentang tanggal tersebut"
+            });
+        }
+
+
+        if (butuh_sopir === "Ya" && id_sopir) {
+
+            const [jadwalSopir] = await db.query(
+                `
+        SELECT id_pengajuan
+        FROM pengajuan_rental
+        WHERE id_sopir = ?
+          AND id_pengajuan <> ?
+          AND status IN ('Menunggu','Disetujui')
+          AND (
+                tanggal_berangkat <= ?
+            AND tanggal_kembali >= ?
+          )
+        `,
+                [
+                    id_sopir,
+                    id,
+                    tanggal_kembali,
+                    tanggal_berangkat
+                ]
+            );
+
+            if (jadwalSopir.length > 0) {
+                return res.status(400).json({
+                    message: "Sopir sudah memiliki jadwal pada rentang tanggal tersebut"
+                });
+            }
+
+        }
+
+
+        const kapasitasMobil = mobil[0].kapasitas;
+
+        if (jumlah_penumpang > kapasitasMobil) {
+            return res.status(400).json({
+                message: `Jumlah penumpang melebihi kapasitas mobil (${kapasitasMobil} orang)`
+            });
+        }
+
+
+
+        const estimasiBiayaHarian = mobil[0].estimasi_biaya_harian;
+
+// Hitung lama penggunaan
+        const lama_penggunaan =
+            Math.ceil((tglKembali - tglBerangkat) / (1000 * 60 * 60 * 24)) + 1;
+
+// Hitung estimasi biaya
+        const estimasi_biaya =
+            lama_penggunaan * estimasiBiayaHarian;
 
         const [result] = await db.query(
             `UPDATE pengajuan_rental
@@ -194,6 +439,8 @@ export const updatePengajuan = async (req, res) => {
                 tanggal_berangkat=?,
                 tanggal_kembali=?,
                 jumlah_penumpang=?,
+                lama_penggunaan=?,
+                estimasi_biaya=?,
                 status=?
              WHERE id_pengajuan=?`,
             [
@@ -207,6 +454,8 @@ export const updatePengajuan = async (req, res) => {
                 tanggal_berangkat,
                 tanggal_kembali,
                 jumlah_penumpang,
+                lama_penggunaan,
+                estimasi_biaya,
                 status,
                 id
             ]

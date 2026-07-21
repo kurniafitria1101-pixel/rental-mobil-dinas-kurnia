@@ -1,7 +1,40 @@
 drop database if exists Rental_mobil;
 create database Rental_mobil_dinas;
 use Rental_mobil_dinas;
+
+SELECT
+    id_pengajuan,
+    id_user,
+    id_mobil,
+    tanggal_berangkat,
+    tanggal_kembali,
+    lama_penggunaan,
+    estimasi_biaya
+FROM pengajuan_rental
+ORDER BY id_pengajuan DESC;
+
+
+
+ALTER TABLE mobil
+ADD COLUMN estimasi_biaya_harian DECIMAL(12,2) NOT NULL DEFAULT 0;
+
+UPDATE mobil
+SET estimasi_biaya_harian = 600000
+WHERE id_mobil = 1;
+
+UPDATE mobil
+SET estimasi_biaya_harian = 450000
+WHERE id_mobil = 2;
+
+UPDATE mobil
+SET estimasi_biaya_harian = 850000
+WHERE id_mobil = 3;
+
+ALTER TABLE pengajuan_rental
+    ADD COLUMN lama_penggunaan INT NOT NULL DEFAULT 0,
+    ADD COLUMN estimasi_biaya DECIMAL(12,2) NOT NULL DEFAULT 0;
 show  databases;
+
 
 
 create table roles(
@@ -158,7 +191,6 @@ create  table pengajuan_rental (
         foreign key (id_sopir)references sopir(id_sopir)
 );
 DESC pengajuan_rental;
-
 INSERT INTO pengajuan_rental
 (id_user, id_mobil, id_sopir, tujuan, keperluan,
  tanggal_berangkat, tanggal_kembali,
@@ -179,6 +211,7 @@ SHOW COLUMNS FROM pengajuan_rental;
 delete from pengajuan_rental;
 alter table pengajuan_rental AUTO_INCREMENT = 1;
 DESCRIBE pengajuan_rental;
+SELECT * FROM pengajuan_rental LIMIT 1;
 
 
 -- ==============================================

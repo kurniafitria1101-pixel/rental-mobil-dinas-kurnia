@@ -10,6 +10,8 @@ import sopirRoutes from './routes/sopirRoutes.mjs';
 import pengajuanRoutes from './routes/pengajuanRoutes.mjs';
 import approvalRoutes from './routes/approvalRoutes.mjs';
 import authRoutes from './routes/authRoutes.mjs';
+import dashboardRoutes from "./routes/dashboardRoutes.mjs";
+import laporanRoutes from "./routes/laporanRoutes.mjs";
 
 const app = express();
 const port = 3000;
@@ -33,6 +35,10 @@ app.use('/api/pengajuan', pengajuanRoutes);
 app.use('/api/approval', approvalRoutes);
 // Route login
 app.use('/api/auth', authRoutes);
+//dahsboard
+app.use('/api/dashboard', dashboardRoutes);
+// bagian membuat laporan seluruhnya
+app.use("/api/laporan", laporanRoutes);
 
 
 app.listen(port, () => {
